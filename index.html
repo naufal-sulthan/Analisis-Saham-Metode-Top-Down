@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Interaktif: Analisis Saham Top-Down</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #0f172a; /* slate-900 */
+        }
+        
+        /* Required Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        
+        /* Custom scrollbar for sidebar */
+        .step-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .step-sidebar::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        .step-sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .step-sidebar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        .step-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .step-btn.active {
+            background-color: #0f766e; /* teal-700 */
+            color: white;
+            border-left: 4px solid #042f2e; /* teal-900 */
+            font-weight: 600;
+        }
+        .step-btn:not(.active):hover {
+            background-color: #e2e8f0; /* slate-200 */
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Chosen Palette: Warm neutral background (slate-50), deep slate text, accents in teal-700 and emerald-600 to signify financial growth and stability. -->
+    
+    <!-- Application Structure Plan: 
+         The application uses a "Dashboard/Guided Funnel" structure. 
+         - A fixed header explains the core concept of Top-Down Analysis.
+         - The main body is split into a navigation sidebar (the 9 steps) and a dynamic content area.
+         - This structure was chosen because Top-Down analysis is inherently sequential and hierarchical. Users can follow the logical flow from Macro to Micro, or jump between steps to see how they interconnect.
+         - The dynamic content area presents the 'Theory' alongside a concrete 'Case Study' (PT Energi Nusantara Tbk) and a data visualization, allowing immediate practical application of the concept. 
+    -->
+
+    <!-- Visualization & Content Choices: 
+         - Macro & Intermarket: Line charts (Chart.js) to show trends over time (Interest Rates, Commodity Prices). Interaction: Hover for exact values. Justification: Trends are critical for macro positioning.
+         - Fundamental & Quantitative: Bar charts to compare metrics (Revenue/Profit, Win Rate %). Justification: Bar charts are optimal for comparing discrete categories or historical averages.
+         - Bandarmologi & Foreign Flow: Stacked Bar / Combo charts. Justification: Shows volume accumulation vs price action effectively.
+         - Narrative & Sentiment: Text blocks with highlighted badges. Justification: Qualitative data is best presented as structured text.
+         - NO SVG/Mermaid used. Layout relies on Tailwind CSS styling and Chart.js for all graphical representations. 
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header Section -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Kerangka Analisis Saham Top-Down</h1>
+            <p class="mt-2 text-slate-600 max-w-3xl leading-relaxed">
+                Analisis Top-Down adalah pendekatan investasi yang dimulai dari gambaran besar ekonomi makro, menyempit ke sektor, hingga spesifik ke data fundamental dan teknikal suatu saham. Urutan 9 langkah di bawah ini <strong>sangat tepat</strong> untuk menyaring *noise* pasar dan menemukan momentum terbaik.
+            </p>
+            <div class="mt-4 inline-flex items-center gap-2 bg-teal-50 text-teal-800 px-4 py-2 rounded-lg text-sm font-medium border border-teal-100">
+                <span class="text-xl">📊</span> Studi Kasus Fiktif: PT Energi Nusantara Tbk (Kode: ENRG) - Sektor Batu Bara
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="flex flex-col lg:flex-row gap-8 h-[calc(100vh-220px)] min-h-[600px]">
+            
+            <!-- Sidebar Navigation (The Funnel) -->
+            <nav class="w-full lg:w-1/3 xl:w-1/4 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+                <div class="bg-slate-800 text-white p-4">
+                    <h2 class="font-semibold text-lg">Urutan Analisis</h2>
+                    <p class="text-slate-300 text-xs mt-1">Pilih langkah untuk melihat detail & aplikasi.</p>
+                </div>
+                <div class="step-sidebar overflow-y-auto flex-grow p-2" id="step-navigation">
+                    <!-- Buttons injected via JS -->
+                </div>
+            </nav>
+
+            <!-- Dynamic Content Area -->
+            <section class="w-full lg:w-2/3 xl:w-3/4 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden">
+                
+                <!-- Content Header -->
+                <div class="p-6 border-b border-slate-100 bg-slate-50">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span id="content-step-number" class="text-xs font-bold uppercase tracking-wider text-teal-600 bg-teal-100 px-2 py-1 rounded">Langkah 1</span>
+                            <h2 id="content-title" class="text-2xl font-bold text-slate-900 mt-2">Makroekonomi</h2>
+                        </div>
+                    </div>
+                    <p id="content-theory" class="mt-3 text-slate-600 text-sm leading-relaxed">
+                        Teori penjelasan akan muncul di sini.
+                    </p>
+                </div>
+
+                <!-- Case Study & Chart Container (Scrollable) -->
+                <div class="flex-grow overflow-y-auto p-6">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        
+                        <!-- Textual Application -->
+                        <div class="flex flex-col gap-4">
+                            <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                                <span class="bg-slate-800 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs">A</span>
+                                Aplikasi pada Saham ENRG
+                            </h3>
+                            <div class="bg-blue-50 border border-blue-100 p-5 rounded-lg">
+                                <p id="content-application" class="text-slate-700 text-sm leading-relaxed">
+                                    Penerapan studi kasus akan muncul di sini.
+                                </p>
+                            </div>
+
+                            <!-- Key Takeaway Box -->
+                            <div class="mt-auto bg-emerald-50 border border-emerald-100 p-4 rounded-lg">
+                                <h4 class="text-emerald-800 font-semibold text-sm mb-1">Kesimpulan Langkah Ini:</h4>
+                                <p id="content-takeaway" class="text-emerald-700 text-sm">Kesimpulan akan muncul di sini.</p>
+                            </div>
+                        </div>
+
+                        <!-- Data Visualization -->
+                        <div class="flex flex-col">
+                            <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2 mb-4">
+                                <span class="bg-slate-800 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs">B</span>
+                                Visualisasi Data
+                            </h3>
+                            <div class="bg-white border border-slate-200 p-4 rounded-lg flex-grow flex items-center justify-center">
+                                <div class="chart-container">
+                                    <canvas id="mainChart"></canvas>
+                                </div>
+                            </div>
+                            <p id="chart-caption" class="text-center text-xs text-slate-500 mt-3 italic">Caption grafik</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <button id="btn-prev" class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        &larr; Sebelumnya
+                    </button>
+                    <span id="step-indicator" class="text-sm font-medium text-slate-500">1 / 9</span>
+                    <button id="btn-next" class="px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        Selanjutnya &rarr;
+                    </button>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Data Structure for the 9 Steps of Top-Down Analysis
+        const analysisData = [
+            {
+                id: 1,
+                title: "Makroekonomi",
+                icon: "🌍",
+                theory: "Langkah pertama adalah melihat kondisi ekonomi global dan domestik. Fokus pada Suku Bunga (Interest Rate), Inflasi, Pertumbuhan GDP, dan kebijakan moneter Bank Sentral. Ekonomi yang berekspansi dengan suku bunga yang stabil atau turun merupakan katalis positif untuk pasar saham secara umum.",
+                application: "Inflasi global mulai melandai. Bank Sentral (The Fed & BI) memberi sinyal pemangkasan suku bunga di kuartal mendatang. Pemotongan suku bunga memicu <em>Risk-On</em>, dimana investor memindahkan dana dari instrumen aman (deposito/obligasi) ke aset berisiko (saham) untuk mencari imbal hasil lebih tinggi. Sektor energi sering diuntungkan saat ekonomi mulai pulih.",
+                takeaway: "Lampu Hijau. Kondisi makro mendukung arus dana masuk ke pasar saham.",
+                chartConfig: {
+                    type: 'line',
+                    caption: "Proyeksi Suku Bunga BI Rate vs Laju Inflasi (%)",
+                    data: {
+                        labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q1 (Est)', 'Q2 (Est)'],
+                        datasets: [
+                            {
+                                label: 'BI Rate (%)',
+                                data: [5.75, 5.75, 6.00, 6.00, 5.75, 5.50],
+                                borderColor: '#0f766e',
+                                backgroundColor: 'rgba(15, 118, 110, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Inflasi (%)',
+                                data: [4.3, 3.5, 2.8, 2.6, 2.5, 2.4],
+                                borderColor: '#e11d48',
+                                backgroundColor: 'transparent',
+                                borderDash: [5, 5],
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { min: 0, max: 8 } },
+                        plugins: { legend: { position: 'top' } }
+                    }
+                }
+            },
+            {
+                id: 2,
+                title: "Intermarket & Commodity",
+                icon: "🔄",
+                theory: "Menganalisis pergerakan kelas aset lain (Obligasi, Mata Uang, Komoditas) untuk melihat arah aliran uang. Untuk saham komoditas, pergerakan harga komoditas dasarnya (underlying) di pasar global adalah leading indicator yang sangat krusial.",
+                application: "Indeks Dolar (DXY) sedang melemah akibat ekspektasi penurunan suku bunga AS. Dolar yang lemah membuat komoditas (yang dihargai dalam dolar) menjadi lebih murah bagi pembeli global, sehingga permintaannya naik. Harga Batu Bara Newcastle (acuan global) menemukan level <em>support</em> kuat di $130/ton dan mulai <em>rebound</em> ke $145/ton menjelang musim dingin.",
+                takeaway: "Lampu Hijau. Kenaikan harga batu bara global akan langsung mengerek Average Selling Price (ASP) margin laba ENRG.",
+                chartConfig: {
+                    type: 'line',
+                    caption: "Pergerakan Harga Batu Bara Newcastle (USD/Ton) - 6 Bulan Terakhir",
+                    data: {
+                        labels: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+                        datasets: [
+                            {
+                                label: 'Harga Batu Bara (USD)',
+                                data: [135, 130, 132, 138, 142, 146],
+                                borderColor: '#d97706',
+                                backgroundColor: '#fcd34d',
+                                borderWidth: 3,
+                                pointRadius: 5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { min: 120, max: 160 } }
+                    }
+                }
+            },
+            {
+                id: 3,
+                title: "Fundamental",
+                icon: "🏢",
+                theory: "Mengevaluasi kesehatan keuangan perusahaan. Fokus pada metrik valuasi (Price-to-Earnings/PER, Price-to-Book/PBV) dan kinerja (Revenue, Net Profit Margin, ROE, tingkat utang/DER). Tujuannya mencari saham berkinerja solid namun harganya masih wajar (Undervalued).",
+                application: "Laporan Keuangan Q3 ENRG baru saja rilis. Pendapatan naik 15% YoY dan Laba Bersih melonjak 25% karena efisiensi operasional. Saat ini, ENRG diperdagangkan pada PER 4.5x (lebih murah dari rata-rata sektor 6x) dan PBV 0.8x. Return on Equity (ROE) mencapai 18%, menunjukkan perusahaan sangat efisien mencetak laba dari modalnya. DER aman di angka 0.4x.",
+                takeaway: "Lampu Hijau. Secara bisnis dasar, perusahaan sangat sehat, bertumbuh, dan valuasinya masih murah.",
+                chartConfig: {
+                    type: 'bar',
+                    caption: "Kinerja Laba Bersih ENRG (Miliar Rupiah) - YoY",
+                    data: {
+                        labels: ['Q1', 'Q2', 'Q3'],
+                        datasets: [
+                            {
+                                label: 'Tahun Lalu',
+                                data: [450, 480, 520],
+                                backgroundColor: '#94a3b8'
+                            },
+                            {
+                                label: 'Tahun Ini',
+                                data: [510, 560, 650],
+                                backgroundColor: '#0ea5e9'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { tooltip: { mode: 'index', intersect: false } }
+                    }
+                }
+            },
+            {
+                id: 4,
+                title: "Naratif (Story)",
+                icon: "📖",
+                theory: "Pasar digerakkan oleh ekspektasi dan cerita masa depan. Naratif adalah tema besar yang diyakini pelaku pasar saat ini, yang bisa mendorong valuasi saham melampaui angka fundamental rasionalnya sesaat.",
+                application: "Naratif global saat ini: Transisi energi hijau (EBT) ternyata berjalan lebih lambat dari perkiraan karena kendala infrastruktur dan pendanaan. Di sisi lain, cuaca musim dingin ekstrem diprediksi melanda belahan bumi utara (Eropa & China), memicu krisis pasokan energi jangka pendek. Cerita 'Energi fosil masih sangat dibutuhkan sebagai <em>baseload</em>' kembali menguat di kalangan fund manager.",
+                takeaway: "Katalis Kuat. Naratif ini memberikan alasan bagi manajer investasi untuk kembali mengakumulasi saham energi konvensional.",
+                chartConfig: {
+                    type: 'doughnut',
+                    caption: "Proyeksi Bauran Energi Global Terkini (Masih didominasi Fosil)",
+                    data: {
+                        labels: ['Batu Bara', 'Minyak & Gas', 'EBT/Renewable', 'Nuklir'],
+                        datasets: [{
+                            data: [35, 45, 15, 5],
+                            backgroundColor: ['#334155', '#475569', '#10b981', '#3b82f6'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%'
+                    }
+                }
+            },
+            {
+                id: 5,
+                title: "Sentimen",
+                icon: "⚡",
+                theory: "Berbeda dengan naratif yang jangka menengah/panjang, sentimen adalah respons emosional pasar jangka pendek terhadap berita spesifik harian/mingguan (Earnings release, RUPS, Aksi Korporasi, regulasi baru).",
+                application: "Berita rilis hari ini: Manajemen ENRG mengumumkan rencana pembagian Dividen Interim yang sangat besar, dengan estimasi <em>Dividend Yield</em> sebesar 8% yang akan <em>Cum Date</em> 2 minggu lagi. Berita ini langsung menjadi <em>headline</em> di forum-forum saham dan memicu euforia pembelian (Fear Of Missing Out/FOMO) dari investor ritel yang mengincar dividen.",
+                takeaway: "Sentimen Positif (Jangka Pendek). Ada dorongan harga instan berkat <em>dividend hunters</em>.",
+                chartConfig: {
+                    type: 'bar',
+                    caption: "Volume Pencarian Berita 'Saham ENRG' di Internet (Skala 0-100)",
+                    data: {
+                        labels: ['H-4', 'H-3', 'H-2', 'H-1', 'Hari Ini'],
+                        datasets: [{
+                            label: 'Minat Pencarian',
+                            data: [15, 20, 18, 45, 100],
+                            backgroundColor: '#f43f5e',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { max: 100 } }
+                    }
+                }
+            },
+            {
+                id: 6,
+                title: "Bandarmologi",
+                icon: "🐋",
+                theory: "Analisis aliran pesanan (Order Flow) dari broker. Konsep ini melacak jejak 'Big Money' / 'Market Maker' / Bandar. Jika harga konsolidasi namun top broker secara konsisten mengumpulkan barang (Net Buy > Net Sell), itu disebut Fase Akumulasi.",
+                application: "Mengecek broker summary ENRG dalam 1 bulan terakhir. Terdapat anomali: saat harga turun tipis bulan lalu, 3 broker institusi besar (misal: ZP, AK, BK) secara diam-diam terus menyapu bersih jutaan lot (Net Buy masif senilai Rp 500 Miliar) pada harga rata-rata Rp 1.050. Sementara broker langganan ritel (YP, PD, CC) tercatat mendominasi kolom penjualan (Net Sell).",
+                takeaway: "Akumulasi Kuat. Barang (saham) telah berpindah dari tangan ritel yang panik ke tangan institusi 'Strong Hands'. Siap diangkat naik.",
+                chartConfig: {
+                    type: 'bar',
+                    caption: "Top Broker Net Volume (Juta Lot) - Akumulasi 1 Bulan Terakhir",
+                    data: {
+                        labels: ['ZP (Inst)', 'AK (Inst)', 'BK (Inst)', 'YP (Ritel)', 'PD (Ritel)'],
+                        datasets: [{
+                            label: 'Net Buy/Sell',
+                            data: [1.2, 0.8, 0.5, -0.9, -1.5],
+                            backgroundColor: (ctx) => {
+                                return ctx.raw > 0 ? '#10b981' : '#ef4444';
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y'
+                    }
+                }
+            },
+            {
+                id: 7,
+                title: "Foreign Flow",
+                icon: "✈️",
+                theory: "Di pasar saham negara berkembang (Emerging Market) seperti Indonesia, aliran dana investor asing (Foreign Institutional) sangat mendikte arah pergerakan harga saham *Bluechip* atau saham kapitalisasi besar/menengah.",
+                application: "Melihat data pergerakan asing di saham ENRG. Selama 10 hari perdagangan terakhir berturut-turut, grafik <em>Net Foreign Buy</em> (NFB) menunjukkan garis menanjak tajam (Inflow dana asing stabil), padahal harga saham belum naik signifikan. Ini adalah divergensi positif yang mengkonfirmasi analisis Bandarmologi sebelumnya.",
+                takeaway: "Konfirmasi Positif. Asing sedang masuk besar-besaran, menjadi katalis penggerak harga utama.",
+                chartConfig: {
+                    type: 'line',
+                    caption: "Korelasi Harga Saham vs Cumulative Net Foreign Buy",
+                    data: {
+                        labels: ['D-10', 'D-8', 'D-6', 'D-4', 'D-2', 'Today'],
+                        datasets: [
+                            {
+                                label: 'Harga Saham (Rp)',
+                                data: [1020, 1030, 1040, 1050, 1060, 1100],
+                                borderColor: '#3b82f6',
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Cum. Foreign Buy (Miliar Rp)',
+                                data: [10, 25, 55, 120, 200, 350],
+                                borderColor: '#10b981',
+                                borderDash: [5, 5],
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { type: 'linear', display: true, position: 'left' },
+                            y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+                        }
+                    }
+                }
+            },
+            {
+                id: 8,
+                title: "Teknikal",
+                icon: "📈",
+                theory: "Analisis teknikal (Chart Pattern, Indikator) adalah langkah akhir untuk menentukan *Timing* (Kapan waktu yang tepat untuk masuk/beli dan kapan untuk keluar/jual) berdasarkan aksi harga historis dan psikologi pasar.",
+                application: "Grafik <em>candlestick</em> ENRG menunjukkan harga baru saja menembus (*Breakout*) garis <em>Resistance</em> kuat di Rp 1.100 yang telah tertahan selama 6 bulan, disertai ledakan Volume transaksi 3x lipat dari rata-rata. Indikator Moving Average (MA) periode 20 hari baru saja memotong ke atas MA 50 hari (*Golden Cross*).",
+                takeaway: "Sinyal Beli (Buy). Entry point sangat ideal saat <em>breakout</em>. Target harga (*Resistance* berikutnya) di Rp 1.350, Batas risiko (*Stop Loss*) di Rp 1.050.",
+                chartConfig: {
+                    type: 'line',
+                    caption: "Teknikal: Breakout Resistance & Golden Cross",
+                    data: {
+                        labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov (W1)', 'Nov (W2)'],
+                        datasets: [
+                            {
+                                label: 'Harga ENRG',
+                                data: [1080, 1050, 1020, 1060, 1090, 1150], // Breakout at end
+                                borderColor: '#0f172a',
+                                borderWidth: 3,
+                                fill: false,
+                                tension: 0.1
+                            },
+                            {
+                                label: 'Resistance Level',
+                                data: [1100, 1100, 1100, 1100, 1100, 1100],
+                                borderColor: '#ef4444',
+                                borderDash: [10, 5],
+                                borderWidth: 2,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                }
+            },
+            {
+                id: 9,
+                title: "Kuantitatif",
+                icon: "🧮",
+                theory: "Mendukung keputusan dengan analisis statistik, data historis, probabilitas (Seasonality), atau algoritma matematika untuk menghilangkan bias emosional.",
+                application: "Melakukan backtesting historis pergerakan saham ENRG selama 10 tahun terakhir (Seasonality Analysis). Secara statistik, ENRG memiliki <em>Win Rate</em> (probabilitas ditutup hijau) sebesar 80% pada bulan November dan Desember, karena efek <em>Window Dressing</em> akhir tahun dan siklus peningkatan penjualan batu bara di kuartal empat.",
+                takeaway: "Probabilitas Tinggi. Secara kuantitatif historis, momentum pembelian saat ini berada di bulan yang probabilitas menangnya paling besar.",
+                chartConfig: {
+                    type: 'bar',
+                    caption: "Seasonality: Win Rate Bulanan Historis ENRG (10 Tahun)",
+                    data: {
+                        labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Probabilitas Naik (%)',
+                            data: [40, 50, 30, 60, 80, 85],
+                            backgroundColor: (ctx) => {
+                                return ctx.raw >= 70 ? '#10b981' : (ctx.raw < 50 ? '#f87171' : '#cbd5e1');
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { min: 0, max: 100 } }
+                    }
+                }
+            }
+        ];
+
+        // State Management
+        let currentStepIndex = 0;
+        let activeChartInstance = null;
+
+        // DOM Elements
+        const stepNavigationEl = document.getElementById('step-navigation');
+        const contentStepNumber = document.getElementById('content-step-number');
+        const contentTitle = document.getElementById('content-title');
+        const contentTheory = document.getElementById('content-theory');
+        const contentApplication = document.getElementById('content-application');
+        const contentTakeaway = document.getElementById('content-takeaway');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const stepIndicator = document.getElementById('step-indicator');
+        const chartCaption = document.getElementById('chart-caption');
+        const canvasCtx = document.getElementById('mainChart').getContext('2d');
+
+        // Initialize Application
+        function initApp() {
+            renderSidebar();
+            updateContent(0);
+            setupEventListeners();
+        }
+
+        // Render Sidebar Navigation
+        function renderSidebar() {
+            stepNavigationEl.innerHTML = '';
+            analysisData.forEach((step, index) => {
+                const btn = document.createElement('button');
+                btn.className = `step-btn w-full text-left px-4 py-3 border-b border-slate-100 flex items-center gap-3 text-sm`;
+                if(index === currentStepIndex) btn.classList.add('active');
+                else btn.classList.add('text-slate-600');
+                
+                btn.innerHTML = `
+                    <span class="text-xl w-6 text-center">${step.icon}</span>
+                    <span class="truncate">${step.id}. ${step.title}</span>
+                `;
+                
+                btn.addEventListener('click', () => {
+                    updateContent(index);
+                });
+                stepNavigationEl.appendChild(btn);
+            });
+        }
+
+        // Update View based on selected Step
+        function updateContent(index) {
+            currentStepIndex = index;
+            const data = analysisData[index];
+
+            // Update Textual Content
+            contentStepNumber.innerText = `Langkah ${data.id}`;
+            contentTitle.innerText = data.title;
+            contentTheory.innerHTML = data.theory;
+            contentApplication.innerHTML = data.application;
+            contentTakeaway.innerText = data.takeaway;
+            chartCaption.innerText = data.chartConfig.caption;
+
+            // Update Sidebar UI
+            const buttons = document.querySelectorAll('.step-btn');
+            buttons.forEach((btn, i) => {
+                if(i === index) {
+                    btn.classList.add('active');
+                    btn.classList.remove('text-slate-600');
+                } else {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-slate-600');
+                }
+            });
+
+            // Update Pagination Controls
+            btnPrev.disabled = index === 0;
+            btnNext.disabled = index === analysisData.length - 1;
+            stepIndicator.innerText = `${index + 1} / ${analysisData.length}`;
+
+            // Render Chart
+            renderChart(data.chartConfig);
+            
+            // Scroll sidebar if needed on small screens
+            buttons[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Render Chart.js Chart
+        function renderChart(config) {
+            // Destroy previous instance to prevent overlapping bugs
+            if (activeChartInstance) {
+                activeChartInstance.destroy();
+            }
+
+            // Global Chart Defaults for cleaner look
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748b';
+
+            activeChartInstance = new Chart(canvasCtx, {
+                type: config.type,
+                data: config.data,
+                options: {
+                    ...config.options,
+                    animation: {
+                        duration: 750,
+                        easing: 'easeInOutQuart'
+                    },
+                    plugins: {
+                        ...config.options.plugins,
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 13 },
+                            bodyFont: { size: 13 },
+                            padding: 10,
+                            cornerRadius: 6,
+                            displayColors: true,
+                            ...config.options.plugins?.tooltip // merge custom tooltips if any
+                        }
+                    }
+                }
+            });
+        }
+
+        // Setup Event Listeners for Prev/Next
+        function setupEventListeners() {
+            btnPrev.addEventListener('click', () => {
+                if (currentStepIndex > 0) updateContent(currentStepIndex - 1);
+            });
+            btnNext.addEventListener('click', () => {
+                if (currentStepIndex < analysisData.length - 1) updateContent(currentStepIndex + 1);
+            });
+        }
+
+        // Start the app on load
+        window.onload = initApp;
+    </script>
+</body>
+</html>
